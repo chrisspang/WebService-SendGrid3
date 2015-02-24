@@ -158,3 +158,67 @@ sub _serialise_for_get {
 }
 
 1;
+
+=head1 SYNOPSIS
+
+  use WebService::SendGrid3;
+  my $SendGrid = WebService::SendGrid3->new(
+    username => 'user',
+    password => 'pass'
+  );
+
+  my $response = $SendGrid->get_stats_global(
+     query => {
+            start_date => '2015-01-01',
+            end_date => '2015-01-03',
+            aggregated_by => 'day',
+     }
+  );
+
+=head1 DESCRIPTION
+
+Simple client for talking to SendGrid API v3.
+
+=head1 METHODS
+
+=head2 username
+
+=head2 password
+
+=head2 BUILD
+
+=head1 CATEGORIES
+
+=head2 get_categories
+
+=head1 SETTINGS
+
+=head2 get_enforced_tls
+
+=head1 STATISTICS
+
+=head2 get_stats_global
+
+=head2 get_stats_category
+
+=head2 get_stats_category_sums
+
+=head2 get_stats_subusers
+
+=head2 get_stats_subusers_sums
+
+=head2 get_stats_geo
+
+=head2 get_stats_devices
+
+=head2 get_stats_clients
+
+=head2 get_stats_for_client
+
+=head2 get_stats_esp
+
+=head2 get_stats_browsers
+
+=head2 get_stats_parse
+
+=cut
