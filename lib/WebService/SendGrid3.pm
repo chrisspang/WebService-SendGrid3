@@ -10,20 +10,25 @@ with 'WebService::Client';
 # ABSTRACT: Client library for SendGrid API v3
 
 use MIME::Base64;
+use Carp 'croak';
 
-has username => ( is => 'ro', required => 1 );
-has password => ( is => 'ro', required => 1 );
+has username => ( is => 'ro' );
+has password => ( is => 'ro' );
+has api_key  => ( is => 'ro' );
 
 has '+base_url' => ( default => 'https://api.sendgrid.com/v3' );
 
 sub BUILD {
     my ($self) = @_;
 
-    my $u = $self->username();
-    my $p = $self->password();
-    my $base64_encoded_auth = encode_base64("$u:$p");
-
-    $self->ua->default_header(Authorization => "Basic " . $base64_encoded_auth);
+    if (my $api_key = $self->api_key) {
+        $self->ua->default_header(Authorization => "Bearer " . $self->api_key);
+    } elsif (my $u = $self->username and my $p = $self->password) {
+        my $base64_encoded_auth = encode_base64("$u:$p");
+        $self->ua->default_header(Authorization => "Basic " . $self->api_key);
+    } else {
+        croak "either api_key or username/password is required.\n";
+    }
 }
 
 ## CATEGORIES
@@ -69,9 +74,6 @@ sub get_stats_category_sums {
 
 sub get_stats_subusers {
     my ($self, %args) = @_;
-
-    use Data::Dumper;
-    print Dumper \%args;
 
     if (defined($args{query}{subusers})) {
         $args{query}{subusers} = $self->_serialise_for_get(
@@ -145,6 +147,48 @@ sub get_stats_parse {
     return $self->get("/parse/stats", $args{query} || {});
 }
 
+## ContactDB: https://sendgrid.com/docs/API_Reference/Web_API_v3/Marketing_Campaigns/contactdb.html
+sub contactdb_list {
+    my ($self, %args) = @_;
+
+    return $self->get("/contactdb/lists", $args{query} || {});
+}
+
+sub contactdb_recipients {
+    my ($self, %args) = @_;
+
+    return $self->get("/contactdb/recipients", $args{query} || {});
+}
+
+sub contactdb_search_recipients {
+    my ($self, %args) = @_;
+
+    return $self->get("/contactdb/recipients/search", $args{query} || {});
+}
+
+sub contactdb_add_recipient {
+    return (shift)->post("/contactdb/recipients", @_);
+}
+
+sub contactdb_delete_recipient {
+    return (shift)->x_delete("/contactdb/recipients", @_);
+}
+
+sub contactdb_segments {
+    my ($self, %args) = @_;
+
+    return $self->get("/contactdb/segments", $args{query} || {});
+}
+
+use HTTP::Request::Common qw(DELETE);
+sub x_delete {
+    my ($self, $path, $data, %args) = @_;
+    my $headers = $self->_headers(\%args);
+    my $url = $self->_url($path);
+    my $req = DELETE $url, %$headers, $self->_content($data, %args);
+    return $self->req($req, %args);
+}
+
 ## PRIVATE
 
 sub _serialise_for_get {
@@ -167,6 +211,11 @@ sub _serialise_for_get {
     password => 'pass'
   );
 
+  # or use API Key
+  my $SendGrid = WebService::SendGrid3->new(
+    api_key => 'my_api_key',
+  );
+
   my $response = $SendGrid->get_stats_global(
      query => {
             start_date => '2015-01-01',
@@ -184,6 +233,8 @@ Simple client for talking to SendGrid API v3.
 =head2 username
 
 =head2 password
+
+=head2 api_key
 
 =head2 BUILD
 
