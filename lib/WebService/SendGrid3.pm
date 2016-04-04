@@ -160,6 +160,12 @@ sub contactdb_recipients {
     return $self->get("/contactdb/recipients", $args{query} || {});
 }
 
+sub contactdb_search_recipients {
+    my ($self, %args) = @_;
+
+    return $self->get("/contactdb/recipients/search", $args{query} || {});
+}
+
 sub contactdb_add_recipient {
     return (shift)->post("/contactdb/recipients", @_);
 }
