@@ -22,6 +22,19 @@ sleep 2;
 
 $res = $SendGrid->contactdb_recipients();
 diag Dumper(\$res);
-ok((grep { $_->{email} eq 'test@example.com' } @{$res->{recipients}}), 'it is there');
+my ($row) = grep { $_->{email} eq 'test@example.com' } @{$res->{recipients}};
+ok($row, 'it is there');
+
+# try delete
+$res = $SendGrid->contactdb_delete_recipient([
+    $row->{id}
+]);
+is $res, 1, 'deleted';
+sleep 2;
+
+$res = $SendGrid->contactdb_recipients();
+diag Dumper(\$res);
+$row = grep { $_->{email} eq 'test@example.com' } @{$res->{recipients}};
+ok(! $row, 'it is removed');
 
 done_testing();

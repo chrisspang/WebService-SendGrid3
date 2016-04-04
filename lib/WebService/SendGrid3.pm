@@ -164,10 +164,23 @@ sub contactdb_add_recipient {
     return (shift)->post("/contactdb/recipients", @_);
 }
 
+sub contactdb_delete_recipient {
+    return (shift)->x_delete("/contactdb/recipients", @_);
+}
+
 sub contactdb_segments {
     my ($self, %args) = @_;
 
     return $self->get("/contactdb/segments", $args{query} || {});
+}
+
+use HTTP::Request::Common qw(DELETE);
+sub x_delete {
+    my ($self, $path, $data, %args) = @_;
+    my $headers = $self->_headers(\%args);
+    my $url = $self->_url($path);
+    my $req = DELETE $url, %$headers, $self->_content($data, %args);
+    return $self->req($req, %args);
 }
 
 ## PRIVATE
