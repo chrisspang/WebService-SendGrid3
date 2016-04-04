@@ -154,6 +154,16 @@ sub contactdb_list {
     return $self->get("/contactdb/lists", $args{query} || {});
 }
 
+sub contactdb_recipients {
+    my ($self, %args) = @_;
+
+    return $self->get("/contactdb/recipients", $args{query} || {});
+}
+
+sub contactdb_add_recipient {
+    return (shift)->post("/contactdb/recipients", @_);
+}
+
 sub contactdb_segments {
     my ($self, %args) = @_;
 
